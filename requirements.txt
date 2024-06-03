@@ -1,0 +1,10 @@
+flask 
+python-socketio==5.0.0
+python-engineio
+flask_cors
+opencv-python-headless 
+soundfile 
+aiortc
+numpy
+eventlet
+
