@@ -1,13 +1,14 @@
 const express = require('express')
 const http = require('http')
-var cors = require('cors')
+const cors = require('cors')
 const app = express()
 const bodyParser = require('body-parser')
 const path = require("path")
-var xss = require("xss")
+const xss = require("xss")
+const fs = require('fs')
 
-var server = http.createServer(app)
-var io = require('socket.io')(server)
+const server = http.createServer(app)
+const io = require('socket.io')(server)
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -20,13 +21,13 @@ if(process.env.NODE_ENV==='production'){
 }
 app.set('port', (process.env.PORT || 4001))
 
-sanitizeString = (str) => {
+const sanitizeString = (str) => {
 	return xss(str)
 }
 
-connections = {}
-messages = {}
-timeOnline = {}
+let connections = {}
+let messages = {}
+let timeOnline = {}
 
 io.on('connection', (socket) => {
 
@@ -77,6 +78,14 @@ io.on('connection', (socket) => {
 			}
 			messages[key].push({"sender": sender, "data": data, "socket-id-sender": socket.id})
 			console.log("message", key, ":", sender, data)
+
+			// Write message to file
+			const logMessage = `${new Date().toISOString()} - ${sender}: ${data}\n`
+			fs.appendFile('tmp/chat_log.txt', logMessage, (err) => {
+				if (err) {
+					console.error('Error writing to file', err)
+				}
+			})
 
 			for(let a = 0; a < connections[key].length; ++a){
 				io.to(connections[key][a]).emit("chat-message", data, sender, socket.id)

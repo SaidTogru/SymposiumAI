@@ -1,39 +1,5 @@
-/* src/Video.css */
-html, body {
-    height: 100%;
-    overflow: hidden;
+body {
     margin: 0;
-    padding: 0;
-}
-
-.main-container {
-    height: 95vh;
-    display: flex;
-}
-
-.ai-chat {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
-
-.broadcast-messages {
-    margin-top: 10px;
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    border-bottom: 1px solid #ccc;
-}
-
-.right-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid #ccc;
-    padding-left: 20px;
-    box-sizing: border-box;
 }
 
 .flex-container {
@@ -71,4 +37,3 @@ html, body {
     width: 100%;
     height: auto;
 }
-
