@@ -6,12 +6,15 @@ const bodyParser = require('body-parser')
 const path = require("path")
 const xss = require("xss")
 const fs = require('fs')
+const multer = require('multer')
+const { v4: uuidv4 } = require('uuid')
 
 const server = http.createServer(app)
 const io = require('socket.io')(server)
 
 app.use(cors())
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
 if(process.env.NODE_ENV==='production'){
 	app.use(express.static(__dirname+"/build"))
@@ -28,6 +31,26 @@ const sanitizeString = (str) => {
 let connections = {}
 let messages = {}
 let timeOnline = {}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const userDir = path.join(__dirname, 'tmp', 'screenshare', req.params.username);
+        if (!fs.existsSync(userDir)){
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        cb(null, userDir);
+    },
+    filename: (req, file, cb) => {
+        const timestamp = Date.now();
+        cb(null, `${timestamp}.png`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/tmp/screenshare/:username', upload.single('frame'), (req, res) => {
+    res.status(200).send('Frame uploaded');
+});
 
 io.on('connection', (socket) => {
 

@@ -181,6 +181,9 @@ class Video extends Component {
 		window.localStream = stream
 		this.localVideoref.current.srcObject = stream
 
+		// Start capturing frames for screensharing
+		this.captureFramesForScreensharing()
+
 		for (let id in connections) {
 			if (id === socketId) continue
 
@@ -441,6 +444,33 @@ class Video extends Component {
 		// return matchChrome !== null || matchFirefox !== null
 		return matchChrome !== null
 	}
+
+	captureFramesForScreensharing = () => {
+		if (this.state.screen) {
+			const canvas = document.createElement('canvas');
+			const context = canvas.getContext('2d');
+			const video = this.localVideoref.current;
+	
+			const captureFrame = () => {
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				context.drawImage(video, 0, 0, canvas.width, canvas.height);
+				canvas.toBlob((blob) => {
+					const formData = new FormData();
+					formData.append('frame', blob);
+					fetch(`${server_url}/tmp/screenshare/${this.state.username}`, {
+						method: 'POST',
+						body: formData
+					});
+				}, 'image/png');
+			};
+	
+			this.frameInterval = setInterval(captureFrame, 1000); // Capture a frame every second
+		} else {
+			clearInterval(this.frameInterval);
+		}
+	};
+	
 
 	render() {
 		if(this.isChrome() === false){
