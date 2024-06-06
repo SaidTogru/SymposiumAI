@@ -52,6 +52,25 @@ app.post('/tmp/screenshare/:username', upload.single('frame'), (req, res) => {
     res.status(200).send('Frame uploaded');
 });
 
+const transcriptionDir = path.join(__dirname, 'tmp', 'transcriptions');
+if (!fs.existsSync(transcriptionDir)) {
+    fs.mkdirSync(transcriptionDir, { recursive: true });
+}
+
+app.post('/tmp/transcriptions/:username', (req, res) => {
+    const { text } = req.body
+    const sanitizedText = sanitizeString(text)
+    const logMessage = `${new Date().toISOString()} - ${sanitizedText}\n`
+    const filePath = path.join(transcriptionDir, `transcriptions_${req.params.username}.txt`);
+    fs.appendFile(filePath, logMessage, (err) => {
+        if (err) {
+            console.error('Error writing to transcription file', err)
+            res.status(500).send('Error saving transcription')
+        } else {
+            res.status(200).send('Transcription saved')
+        }
+    })
+})
 io.on('connection', (socket) => {
 
 	socket.on('join-call', (path) => {

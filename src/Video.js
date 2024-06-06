@@ -20,7 +20,7 @@ import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css'
 import "./Video.css"
 
-const server_url = process.env.NODE_ENV === 'production' ? 'https://video.sebastienbiollo.com' : "http://localhost:4001"
+const server_url = "http://localhost:4001"
 
 var connections = {}
 const peerConnectionConfig = {
@@ -434,7 +434,10 @@ class Video extends Component {
 		})
 	}
 
-	connect = () => this.setState({ askForUsername: false }, () => this.getMedia())
+	connect = () => this.setState({ askForUsername: false }, () => {
+		this.getMedia()
+		this.startSpeechRecognition()
+	})
 
 	isChrome = function () {
 		let userAgent = (navigator && (navigator.userAgent || '')).toLowerCase()
@@ -470,6 +473,50 @@ class Video extends Component {
 			clearInterval(this.frameInterval);
 		}
 	};
+	
+	startSpeechRecognition = () => {
+		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+		if (SpeechRecognition) {
+			const recognition = new SpeechRecognition();
+			recognition.continuous = true;
+			recognition.interimResults = true;
+			recognition.lang = 'en-US';
+	
+			recognition.onresult = (event) => {
+				for (let i = event.resultIndex; i < event.results.length; ++i) {
+					if (event.results[i].isFinal) {
+						const transcript = event.results[i][0].transcript.trim();
+						this.sendTranscription(transcript);
+					}
+				}
+			};
+	
+			recognition.onerror = (event) => {
+				console.error('Speech recognition error', event);
+			};
+	
+			recognition.onend = () => {
+				recognition.start(); // Restart recognition to keep it continuous
+			};
+	
+			recognition.start();
+		} else {
+			console.warn('Web Speech API is not supported in this browser');
+		}
+	}
+	
+	sendTranscription = (text) => {
+		fetch(`${server_url}/tmp/transcriptions/${this.state.username}`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ text })
+		})
+		.then(response => response.text())
+		.then(data => console.log('Transcription saved:', data))
+		.catch(error => console.error('Error saving transcription:', error));
+	}
 	
 
 	render() {

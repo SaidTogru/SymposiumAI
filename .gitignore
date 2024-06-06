@@ -7,6 +7,8 @@
 tmp/chat_log.txt
 *.png
 !icon.png
+tmp/transcriptions/*.txt
+*.log
 
 # testing
 /coverage
