@@ -71,6 +71,33 @@ app.post('/tmp/transcriptions/:username', (req, res) => {
         }
     })
 })
+
+const videoFramesDir = path.join(__dirname, 'tmp', 'videoframes');
+if (!fs.existsSync(videoFramesDir)) {
+    fs.mkdirSync(videoFramesDir, { recursive: true });
+}
+
+const storageVideoFrames = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const userDir = path.join(videoFramesDir, req.params.username);
+        if (!fs.existsSync(userDir)){
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        cb(null, userDir);
+    },
+    filename: (req, file, cb) => {
+        const timestamp = Date.now();
+        cb(null, `${timestamp}.png`);
+    }
+});
+
+const uploadVideoFrames = multer({ storage: storageVideoFrames });
+
+app.post('/tmp/videoframes/:username', uploadVideoFrames.single('frame'), (req, res) => {
+    res.status(200).send('Frame uploaded');
+});
+
+
 io.on('connection', (socket) => {
 
 	socket.on('join-call', (path) => {
@@ -102,7 +129,7 @@ io.on('connection', (socket) => {
 	socket.on('chat-message', (data, sender) => {
 		data = sanitizeString(data)
 		sender = sanitizeString(sender)
-
+	
 		var key
 		var ok = false
 		for (const [k, v] of Object.entries(connections)) {
@@ -113,22 +140,28 @@ io.on('connection', (socket) => {
 				}
 			}
 		}
-
+	
 		if(ok === true){
 			if(messages[key] === undefined){
 				messages[key] = []
 			}
 			messages[key].push({"sender": sender, "data": data, "socket-id-sender": socket.id})
 			console.log("message", key, ":", sender, data)
-
+	
+			// Ensure the chat log file exists, create if it doesn't
+			const chatLogPath = 'tmp/chat_log.txt';
+			if (!fs.existsSync(chatLogPath)) {
+				fs.writeFileSync(chatLogPath, '');
+			}
+	
 			// Write message to file
 			const logMessage = `${new Date().toISOString()} - ${sender}: ${data}\n`
-			fs.appendFile('tmp/chat_log.txt', logMessage, (err) => {
+			fs.appendFile(chatLogPath, logMessage, (err) => {
 				if (err) {
 					console.error('Error writing to file', err)
 				}
 			})
-
+	
 			for(let a = 0; a < connections[key].length; ++a){
 				io.to(connections[key][a]).emit("chat-message", data, sender, socket.id)
 			}

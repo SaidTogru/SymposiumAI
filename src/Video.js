@@ -377,18 +377,61 @@ class Video extends Component {
 		let stream = canvas.captureStream()
 		return Object.assign(stream.getVideoTracks()[0], { enabled: false })
 	}
-
-	handleVideo = () => this.setState({ video: !this.state.video }, () => this.getUserMedia())
+	
+	handleVideo = () => this.setState({ video: !this.state.video }, () => {
+		console.log(this.state.video)
+		this.getUserMedia();
+		if (this.state.video) {
+			this.startVideoCapture();
+		} else {
+			this.stopVideoCapture();
+		}
+	});
+	
+	handleEndCall = () => {
+		try {
+			let tracks = this.localVideoref.current.srcObject.getTracks();
+			tracks.forEach(track => track.stop());
+		} catch (e) {}
+	
+		this.stopVideoCapture();
+		window.location.href = "/";
+	};
+	
 	handleAudio = () => this.setState({ audio: !this.state.audio }, () => this.getUserMedia())
 	handleScreen = () => this.setState({ screen: !this.state.screen }, () => this.getDislayMedia())
 
-	handleEndCall = () => {
-		try {
-			let tracks = this.localVideoref.current.srcObject.getTracks()
-			tracks.forEach(track => track.stop())
-		} catch (e) {}
-		window.location.href = "/"
-	}
+	captureVideoFrames = () => {
+		const canvas = document.createElement('canvas');
+		const context = canvas.getContext('2d');
+		const video = this.localVideoref.current;
+	
+		const captureFrame = () => {
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+			context.drawImage(video, 0, 0, canvas.width, canvas.height);
+			canvas.toBlob((blob) => {
+				const formData = new FormData();
+				formData.append('frame', blob);
+				fetch(`${server_url}/tmp/videoframes/${this.state.username}`, {
+					method: 'POST',
+					body: formData
+				});
+			}, 'image/png');
+		};
+	
+		this.frameInterval = setInterval(captureFrame, 1000); // Capture a frame every second
+	};
+	
+	startVideoCapture = () => {
+		this.captureVideoFrames();
+	};
+	
+	stopVideoCapture = () => {
+		clearInterval(this.frameInterval);
+	};
+	
+
 
 	openChat = () => this.setState({ showModal: true, newmessages: 0 })
 	closeChat = () => this.setState({ showModal: false })
@@ -436,6 +479,7 @@ class Video extends Component {
 
 	connect = () => this.setState({ askForUsername: false }, () => {
 		this.getMedia()
+		this.startVideoCapture();
 		this.startSpeechRecognition()
 	})
 
@@ -477,33 +521,44 @@ class Video extends Component {
 	startSpeechRecognition = () => {
 		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 		if (SpeechRecognition) {
-			const recognition = new SpeechRecognition();
-			recognition.continuous = true;
-			recognition.interimResults = true;
-			recognition.lang = 'en-US';
+			navigator.mediaDevices.getUserMedia({ audio: true })
+				.then((stream) => {
+					const recognition = new SpeechRecognition();
+					recognition.continuous = true;
+					recognition.interimResults = true;
+					recognition.lang = 'en-US';
 	
-			recognition.onresult = (event) => {
-				for (let i = event.resultIndex; i < event.results.length; ++i) {
-					if (event.results[i].isFinal) {
-						const transcript = event.results[i][0].transcript.trim();
-						this.sendTranscription(transcript);
-					}
-				}
-			};
+					recognition.onresult = (event) => {
+						for (let i = event.resultIndex; i < event.results.length; ++i) {
+							if (event.results[i].isFinal) {
+								const transcript = event.results[i][0].transcript.trim();
+								this.sendTranscription(transcript);
+							}
+						}
+					};
 	
-			recognition.onerror = (event) => {
-				console.error('Speech recognition error', event);
-			};
+					recognition.onerror = (event) => {
+						console.error('Speech recognition error', event);
+						if (event.error === 'not-allowed') {
+							alert('Microphone access was denied. Please allow access to use speech recognition.');
+						}
+					};
 	
-			recognition.onend = () => {
-				recognition.start(); // Restart recognition to keep it continuous
-			};
+					recognition.onend = () => {
+						recognition.start(); // Restart recognition to keep it continuous
+					};
 	
-			recognition.start();
+					recognition.start();
+				})
+				.catch((error) => {
+					console.error('Error accessing microphone:', error);
+					alert('Microphone is not available or access was denied. Speech recognition will not work.');
+				});
 		} else {
 			console.warn('Web Speech API is not supported in this browser');
 		}
 	}
+	
 	
 	sendTranscription = (text) => {
 		fetch(`${server_url}/tmp/transcriptions/${this.state.username}`, {
