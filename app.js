@@ -97,6 +97,38 @@ app.post('/tmp/videoframes/:username', uploadVideoFrames.single('frame'), (req, 
     res.status(200).send('Frame uploaded');
 });
 
+const AIFilePath = path.join(__dirname, 'tmp', 'AI.txt');
+
+// Function to read AI.txt file and emit its content to clients
+const checkAndSendAIContent = () => {
+    fs.readFile(AIFilePath, 'utf8', (err, data) => {
+        if (err) {
+            if (err.code !== 'ENOENT') {
+                console.error('Error reading AI.txt file', err);
+            }
+            return;
+        }
+
+        if (data.trim()) { // If the file is not empty
+            // Send data to all connected clients
+            for (const [key, clients] of Object.entries(connections)) {
+                for (const clientId of clients) {
+                    io.to(clientId).emit('ai-message', data);
+                }
+            }
+
+            // Clear the file after reading
+            fs.writeFile(AIFilePath, '', (err) => {
+                if (err) {
+                    console.error('Error clearing AI.txt file', err);
+                }
+            });
+        }
+    });
+};
+
+// Check AI.txt file every second
+setInterval(checkAndSendAIContent, 1000);
 
 io.on('connection', (socket) => {
 

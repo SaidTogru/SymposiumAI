@@ -277,6 +277,19 @@ class Video extends Component {
 
 		socket.on('signal', this.gotMessageFromServer)
 
+
+		socket.on('ai-message', (data) => {
+			const messages = data.trim().split('\n').map(line => {
+				const parts = line.split(':');
+				return { sender: parts[0].trim(), data: parts.slice(1).join(':').trim() };
+			});
+
+			this.setState(prevState => ({
+				messages: [...prevState.messages, ...messages]
+			}));
+		});
+
+
 		socket.on('connect', () => {
 			socket.emit('join-call', window.location.href)
 			socketId = socket.id
