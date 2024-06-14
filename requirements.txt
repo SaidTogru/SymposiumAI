@@ -7,4 +7,13 @@ soundfile
 aiortc
 numpy
 eventlet
-
+langchain
+langchain-core
+langchain-community
+langchain-experimental
+langchain-openai
+langgraph
+openai
+unstructured[pdf]
+chromadb
+umap-learn

@@ -23,6 +23,15 @@ tmp/transcriptions/*.txt
 .env.test.local
 .env.production.local
 
+# Any pycache
+__pycache__/
+
+# Any VSCode settings
+.vscode/
+
+# secret keys
+/src/advanced-rag/configs/azure_config.py
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
