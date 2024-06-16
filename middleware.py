@@ -17,3 +17,7 @@ The following middleware have to deal also with the following cases:
 3. When a user is confused, but there is no information in the tmp folder about this user,
     it should display a default message on frontend.
 """
+from ConfusionDetector import ConfusionDetector
+
+detector = ConfusionDetector()
+detector.run()
