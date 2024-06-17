@@ -1,5 +1,9 @@
+import os
+import time
+import datetime
+from collections import namedtuple
 from deepface import DeepFace
-import time, os
+
 from src.advanced_rag.pipeline import RAGPipeline
 
 
@@ -28,6 +32,13 @@ class Middleware:
         self.user_confused_dict = {}
         # last time called llm
         self.last_call = None
+        
+        self.rag = RAGPipeline(
+            documents_dir=os.path.join(self.tmp_folder_path, "db/raw_documents"),
+            api_key=os.environ.get("OPENAI_API_KEY"),
+            self_correction=False,
+            text_splitter="recursive"
+        )
 
     def is_confused(self, emotions):
         if emotions["surprise"] > self.surprise_threshold and (
@@ -36,6 +47,62 @@ class Middleware:
         ):
             return True
         return False
+    
+    def prepare_chat_history(directory, ai_messages_file):
+        """Sorts transcript files by overall time and speaker name.
+
+        Args:
+            directory: Path to the directory containing transcript files.
+            ai_messages_file: Path to the file containing AI messages.
+
+        Returns:
+            A list of namedtuples containing speaker name, timestamp, message, and AI flag.
+        """
+
+        Transcript = namedtuple("Transcript", ["speaker", "timestamp", "message", "ai"])
+        messages = []
+
+        # Process transcript files
+        for filename in os.listdir(directory):
+            if not filename.endswith(".txt"):
+                continue
+
+            speaker = filename.split("_")[-1].rstrip(".txt")
+
+            with open(os.path.join(directory, filename), "r") as f:
+                for line in f:
+                    try:
+                        timestamp, message = line.strip().split(" - ", 1)
+                        messages.append(Transcript(speaker, timestamp, message, False))
+                    except ValueError:
+                        # Skip empty lines
+                        pass
+
+        # Process AI messages file
+        with open(ai_messages_file, "r") as f:
+            for line in f:
+                try:
+                    timestamp, message = line.strip().split(" - ", 1)
+                    messages.append(Transcript("SyposiumAI", timestamp, message, True))
+                except ValueError:
+                    # Skip empty lines
+                    pass
+
+        # Sort by timestamp
+        messages.sort(key=lambda x: datetime.datetime.fromisoformat(x.timestamp))
+
+        chat_history = []
+        for utterance in messages:
+            if utterance.ai:
+                chat_history.append(("ai", f"SyposiumAI: {utterance.message}"))
+            else:
+                if utterance.speaker.lower() == "human":
+                    participant_name = utterance.speaker
+                else:
+                    participant_name = f"{utterance.speaker}"
+            chat_history.append(("human", f"{participant_name} : {utterance.message}"))
+
+        return chat_history
 
     def process_frames(self):
         users = [f for f in os.listdir(self.tmp_folder_path)]
@@ -105,11 +172,20 @@ class Middleware:
                     ):
                         print(f"{user} detected! with {confusion_percentage}")
                         self.last_call = time.time()
-                        # TODO collect all new information in the tmp folder for every user as context
-                        # NOTE exclude of course videoframes (thats just for confusion detection)
-                        # NOTE Then call the LLM call call_llm to generate a response for the user with the given context
-                        # NOTE message = self.call_llm
-                        message = None
+                        chat_history = self.prepare_chat_history(
+                            os.path.join(self.tmp_folder_path, "transcriptions"), 
+                            os.path.join(self.tmp_folder_path, "AI.txt")
+                        )
+                        message = self.rag(
+                            "You will receiver an addressee and a chat history. \
+                            Help the addresse according to the system prompt, i.e. get \
+                            them up to speed with the meeting based on recent chat history \
+                            utterances and explain the concepts currently talked about - if \
+                            need be retrieve documents fromt the vectorstore to aid in this.", 
+                            addressee='Marco', #TODO: how to get name of confused participant?
+                            chat_history=chat_history, 
+                            previously_retrieved_docs=[]
+                        )["answer"]
                         ai_message = f"SymposiumAI: {message}\n"
                         ai_file_path = os.path.join("tmp", "AI.txt")
                         with open(ai_file_path, "a") as ai_file:
