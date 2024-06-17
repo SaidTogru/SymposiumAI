@@ -1,0 +1,18 @@
+2024-06-13T09:10:21.132Z - and now we are speaking that's a test
+2024-06-13T09:10:26.720Z - test text transcription one two three
+2024-06-13T09:10:31.700Z - let me see if everything yes here is it
+2024-06-13T09:10:40.616Z - so everything got transcripted
+2024-06-13T09:11:02.904Z - and yeah as I said together from now on here we have to implement just this and then connect this to the large language model or from you Marco and then we're finished basically
+2024-06-13T09:11:23.821Z - and then of course I think the hardest thing or the most difficult thing will be the presentation video because this runs on local host so I can stream for example instead of my screen a video of some guy that we don't know it
+2024-06-13T09:11:37.117Z - and but we would only have on one user so maybe I can do that with two laptops or two PCs
+2024-06-13T09:11:43.002Z - at my localhost but we can't do that together this is the problem
+2024-06-13T09:11:49.108Z - 
+2024-06-13T09:11:57.629Z - I yeah but on localhost on lmu I don't know how to enable
+2024-06-13T09:12:01.505Z - the excess
+2024-06-13T09:12:06.117Z - yeah because
+2024-06-13T09:12:15.202Z - yeah I don't know if that will work because you have to
+2024-06-13T09:12:20.919Z - you have to Freeport from the router so
+2024-06-13T09:12:30.811Z - basically all the all the things that you send to the router gets back to local host in the same network
+2024-06-13T09:12:43.118Z - so in unknown networks where you don't have access to the router it's difficult to do but we we can try it out
+2024-06-13T09:12:48.503Z - I will yeah okay
+2024-06-13T09:12:51.711Z - that's all to that

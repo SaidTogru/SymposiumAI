@@ -5,7 +5,7 @@
 /.pnp
 .pnp.js
 tmp/chat_log.txt
-*.png
+tmp/**/**/*.png
 !icon.png
 tmp/transcriptions/*.txt
 *.log
