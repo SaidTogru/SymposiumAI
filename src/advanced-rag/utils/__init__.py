@@ -1,7 +1,5 @@
 from typing import List, Tuple, TypedDict
 
-from .setup_models import setup_models
-
 
 class GraphState(TypedDict):
     """

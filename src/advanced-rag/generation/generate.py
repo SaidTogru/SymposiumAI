@@ -48,12 +48,8 @@ def generation_factory(llm: AzureChatOpenAI):
                 "{chat_history}"
             ),
             (
-                "placeholder",
-                "Participant in need of assistance: {addressee}"
-            ),
-            (
                 "human",
-                "\nQuestion: {user_query}\n\nContext: {context}\n\nAnswer:"
+                "\nQuestion: {user_query}\n\nAddressee: {addressee}\n\nContext: {context}\n\nAnswer:"
             )
         ])
 

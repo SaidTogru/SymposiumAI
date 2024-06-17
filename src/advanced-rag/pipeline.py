@@ -1,4 +1,3 @@
-# https://github.com/langchain-ai/langchain/blob/master/cookbook/langgraph_self_rag.ipynb
 from typing import List, Dict, Tuple
 
 from .query_translation import transform_query_factory
@@ -8,9 +7,9 @@ from .generation import generation_factory
 from .flow_control import decide_to_generate, decide_to_retrieve, prepare_for_final_grade
 from .evaluation.retrieval import grade_documents_factory
 from .evaluation.generation import grade_generation_v_documents_factory, grade_generation_v_question_factory
-from .utils import GraphState, setup_models
-from .configs.azure_config import llm_config, embedding_config
+from .utils import GraphState
 
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langgraph.graph import END, StateGraph
 
 class RAGPipeline:
@@ -18,12 +17,20 @@ class RAGPipeline:
         self,
         self_correction: bool,
         documents_dir: str,
+        api_key: str,
         index_persist_directory: str = None,
         index_type: str  = 'naive',
         text_splitter: str = 'recursive'
         ) -> None:
 
-        self.llm, self.embd = setup_models(llm_config, embedding_config)
+        self.llm = ChatOpenAI(
+            # model = 'gpt-4o',
+            api_key=api_key,
+        )
+        self.embd = OpenAIEmbeddings(
+            # model='text-embedding-3-small',
+            api_key=api_key,
+        )
 
         self.index_type = index_type
         self.text_splitter = text_splitter
@@ -130,6 +137,7 @@ class RAGPipeline:
 
 rag = RAGPipeline(
     documents_dir="src/advanced-rag/db/raw_documents",
+    api_key="API_KEY",
     self_correction=False,
     text_splitter="recursive"
 )
