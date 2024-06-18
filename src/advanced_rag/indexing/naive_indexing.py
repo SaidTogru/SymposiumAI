@@ -14,11 +14,11 @@ class NaiveIndexBuilder(IndexInterface):
         documents_dir: str,
         embd: AzureOpenAIEmbeddings,
         llm: AzureChatOpenAI,
-        text_splitter: str) -> None:
+        text_splitter: str,
+        persist_base_directory: str) -> None:
 
         self.documents_dir = documents_dir
 
-        persist_base_directory = os.path.join(os.getcwd(), "src", "advanced-rag", "db", "vectorstores")
         self.persist_directory = os.path.join(
             persist_base_directory, text_splitter
         )

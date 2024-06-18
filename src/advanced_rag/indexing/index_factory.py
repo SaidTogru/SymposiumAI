@@ -17,7 +17,7 @@ def index_factory(
             embd=embd,
             llm=llm,
             text_splitter=text_splitter,
-            # persist_base_directory=index_persist_directory
+            persist_base_directory=index_persist_directory
         )
     elif index_type == "raptor":
         return RaptorIndexBuilder(

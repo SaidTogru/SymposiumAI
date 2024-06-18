@@ -18,7 +18,7 @@ class RAGPipeline:
         self_correction: bool,
         documents_dir: str,
         api_key: str,
-        index_persist_directory: str = None,
+        index_persist_directory: str,
         index_type: str  = 'naive',
         text_splitter: str = 'recursive'
         ) -> None:
