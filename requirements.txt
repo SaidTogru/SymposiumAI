@@ -17,3 +17,4 @@ openai
 unstructured[pdf]
 chromadb
 umap-learn
+deepface

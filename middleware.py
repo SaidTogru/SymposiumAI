@@ -36,6 +36,7 @@ class Middleware:
         self.rag = RAGPipeline(
             documents_dir=os.path.join(self.tmp_folder_path, "db/raw_documents"),
             api_key=os.environ.get("OPENAI_API_KEY"),
+            index_persist_directory=os.path.join(self.tmp_folder_path, "db/index"),
             self_correction=False,
             text_splitter="recursive"
         )
@@ -48,7 +49,7 @@ class Middleware:
             return True
         return False
     
-    def prepare_chat_history(directory, ai_messages_file):
+    def prepare_chat_history(self, directory, ai_messages_file):
         """Sorts transcript files by overall time and speaker name.
 
         Args:
