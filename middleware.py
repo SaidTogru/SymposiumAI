@@ -35,7 +35,7 @@ class Middleware:
 
         self.rag = RAGPipeline(
             documents_dir=os.path.join(self.tmp_folder_path, "db/raw_documents"),
-            api_key=os.environ.get("OPENAI_API_KEY"),
+            api_key='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',
             index_persist_directory=os.path.join(self.tmp_folder_path, "db/index"),
             self_correction=False,
             text_splitter="recursive"
@@ -106,10 +106,13 @@ class Middleware:
         return chat_history
 
     def process_frames(self):
+        # list contains names of the folders for each participants, name corresponds to the username, e.g. June.Bond
         users = [f for f in os.listdir(self.tmp_folder_path)]
+        # This list contains the full path of the user and the user name. e.g. (June.Bond, tmp/videoframes/June.Bond)
         user_paths = [(f, os.path.join(self.tmp_folder_path, f)) for f in users]
 
         for user, user_path in user_paths:
+            # get the most recent that haven't processed
             current_folder = set(
                 [os.path.join(user_path, f) for f in os.listdir(user_path)]
             )
@@ -183,7 +186,7 @@ class Middleware:
                             them up to speed with the meeting based on recent chat history \
                             utterances and explain the concepts currently talked about - if \
                             need be retrieve documents fromt the vectorstore to aid in this.",
-                            addressee= user, #TODO: how to get name of confused participant?
+                            addressee= user, # user corresponds the username, '.' divedes the first name and second name.
                             chat_history=chat_history,
                             previously_retrieved_docs=[]
                         )["answer"]
