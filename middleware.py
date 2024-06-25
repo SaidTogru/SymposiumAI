@@ -32,7 +32,7 @@ class Middleware:
         self.user_confused_dict = {}
         # last time called llm
         self.last_call = None
-        
+
         self.rag = RAGPipeline(
             documents_dir=os.path.join(self.tmp_folder_path, "db/raw_documents"),
             api_key=os.environ.get("OPENAI_API_KEY"),
@@ -48,7 +48,7 @@ class Middleware:
         ):
             return True
         return False
-    
+
     def prepare_chat_history(self, directory, ai_messages_file):
         """Sorts transcript files by overall time and speaker name.
 
@@ -174,7 +174,7 @@ class Middleware:
                         print(f"{user} detected! with {confusion_percentage}")
                         self.last_call = time.time()
                         chat_history = self.prepare_chat_history(
-                            os.path.join(self.tmp_folder_path, "transcriptions"), 
+                            os.path.join(self.tmp_folder_path, "transcriptions"),
                             os.path.join(self.tmp_folder_path, "AI.txt")
                         )
                         message = self.rag(
@@ -182,9 +182,9 @@ class Middleware:
                             Help the addresse according to the system prompt, i.e. get \
                             them up to speed with the meeting based on recent chat history \
                             utterances and explain the concepts currently talked about - if \
-                            need be retrieve documents fromt the vectorstore to aid in this.", 
-                            addressee='Marco', #TODO: how to get name of confused participant?
-                            chat_history=chat_history, 
+                            need be retrieve documents fromt the vectorstore to aid in this.",
+                            addressee= user, #TODO: how to get name of confused participant?
+                            chat_history=chat_history,
                             previously_retrieved_docs=[]
                         )["answer"]
                         ai_message = f"SymposiumAI: {message}\n"
