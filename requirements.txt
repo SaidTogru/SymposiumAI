@@ -18,3 +18,4 @@ unstructured[pdf]
 chromadb
 umap-learn
 deepface
+python-dateutil
