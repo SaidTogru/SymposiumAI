@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 from collections import namedtuple
+from dateutil.parser import isoparse
 from deepface import DeepFace
 
 from src.advanced_rag.pipeline import RAGPipeline
@@ -10,7 +11,7 @@ from src.advanced_rag.pipeline import RAGPipeline
 class Middleware:
     def __init__(
         self,
-        tmp_folder_path="tmp/videoframes",
+        tmp_folder_path="tmp",
         confusion_threshold_seconds=5,
         confusion_percentage_threshold=0.7,
     ):
@@ -90,7 +91,7 @@ class Middleware:
                     pass
 
         # Sort by timestamp
-        messages.sort(key=lambda x: datetime.datetime.fromisoformat(x.timestamp))
+        messages.sort(key=lambda x: isoparse(x.timestamp))
 
         chat_history = []
         for utterance in messages:
@@ -106,10 +107,11 @@ class Middleware:
         return chat_history
 
     def process_frames(self):
+        user_frames_folder = os.path.join(self.tmp_folder_path, "videoframes")
         # list contains names of the folders for each participants, name corresponds to the username, e.g. June.Bond
-        users = [f for f in os.listdir(self.tmp_folder_path)]
+        users = [f for f in os.listdir(user_frames_folder)]
         # This list contains the full path of the user and the user name. e.g. (June.Bond, tmp/videoframes/June.Bond)
-        user_paths = [(f, os.path.join(self.tmp_folder_path, f)) for f in users]
+        user_paths = [(f, os.path.join(user_frames_folder, f)) for f in users]
 
         for user, user_path in user_paths:
             # get the most recent that haven't processed
