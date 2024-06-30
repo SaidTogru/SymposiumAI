@@ -99,7 +99,7 @@ app.post('/tmp/videoframes/:username', uploadVideoFrames.single('frame'), (req, 
 
 const AIFilePath = path.join(__dirname, 'tmp', 'AI.txt');
 
-// Function to read AI.txt file and emit its content to clients
+// Function to read AI.txt file and emit its content to respective clients
 const checkAndSendAIContent = () => {
     fs.readFile(AIFilePath, 'utf8', (err, data) => {
         if (err) {
@@ -110,12 +110,22 @@ const checkAndSendAIContent = () => {
         }
 
         if (data.trim()) { // If the file is not empty
-            // Send data to all connected clients
-            for (const [key, clients] of Object.entries(connections)) {
-                for (const clientId of clients) {
-                    io.to(clientId).emit('ai-message', data);
+            const lines = data.trim().split('\n');
+
+            lines.forEach(line => {
+                const [usernamePart, ...messageParts] = line.split(' ');
+                const username = usernamePart.slice(1); // Remove the '@' symbol
+                const message = messageParts.join(' ').trim();
+
+                if (username && message) {
+                    // Find the socket ID of the user with the given username
+                    const socketId = Object.keys(connections).find(key => connections[key].username === username);
+
+                    if (socketId) {
+                        io.to(socketId).emit('ai-message', message);
+                    }
                 }
-            }
+            });
 
             // Clear the file after reading
             fs.writeFile(AIFilePath, '', (err) => {
@@ -129,6 +139,17 @@ const checkAndSendAIContent = () => {
 
 // Check AI.txt file every second
 setInterval(checkAndSendAIContent, 1000);
+
+// Store connections with username
+io.on('connection', (socket) => {
+    socket.on('register-username', (username) => {
+        connections[socket.id] = { username };
+    });
+
+    socket.on('disconnect', () => {
+        delete connections[socket.id];
+    });
+});
 
 io.on('connection', (socket) => {
 

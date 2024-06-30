@@ -12,9 +12,9 @@ SymposiumAI is a video conference website... Developed with...
 ### Local setup
 
 yarn install
-export NODE_OPTIONS=--openssl-legacy-provider
 yarn dev
 
+if error err_ossl_evp_unsupported then execute --> export NODE_OPTIONS=--openssl-legacy-provider
 (sudo lsof -i :4001 --> sudo kill -9 X)
 
 ## How to simulate virtual webcam (in linux)
