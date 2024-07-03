@@ -20,7 +20,8 @@ import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css'
 import "./Video.css"
 
-const server_url = "http://localhost:4001"
+// NEW VERSIOn
+const server_url = "https://localhost:4001"
 
 var connections = {}
 const peerConnectionConfig = {
