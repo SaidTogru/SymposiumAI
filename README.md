@@ -1,32 +1,59 @@
 # SymposiumAI
-SymposiumAI is a video conference website... Developed with...
 
-### Features
+SymposiumAI is a video conference website that enables real-time messaging, video streaming, and screen sharing. Developed with a focus on privacy, performance, and efficiency, SymposiumAI is tailored for AI assistance to ensure that participants always have relevant information at hand, minimizing wasted time in meetings. Leveraging WebRTC for peer-to-peer communication, SymposiumAI offers a seamless and secure experience.
+
+## Features
 - Unlimited users
-- Messaging chat and video streaming in real-time
-- Screen sharing to present documents, slides, and more
-- Everyting is peer-to-peer thanks to webrtc
-...
+- Real-time messaging chat and video streaming
+- Screen sharing for presentations and document sharing
+- Peer-to-peer communication using WebRTC
+- AI-generated info messages to provide context and relevance
+- User-specific context file uploads to enhance meeting productivity
 
+## Prerequisites
 
-### Local setup
+Ensure you have the following software installed on your system:
+- Node.js
+- Yarn
+- Python
 
-yarn install
-yarn dev
+## Setup and Installation
 
-if error err_ossl_evp_unsupported then execute --> export NODE_OPTIONS=--openssl-legacy-provider
-(sudo lsof -i :4001 --> sudo kill -9 X)
+### Frontend Setup
 
-## How to simulate virtual webcam (in linux)
-sudo apt update  
-sudo apt install v4l2loopback-dkms ffmpeg cheese v4l-utils  
-sudo modprobe -r v4l2loopback 
+1. **Clone the repository:**
+   ```sh
+   git clone https://gitlab.lrz.de/cai-ss24/Bystander-in-Multi-Party-Dialogue.git
+   cd Bystander-in-Multi-Party-Dialogue
+   ```
 
-sudo modprobe v4l2loopback devices=1 video_nr=2 card_label="VirtualCam" exclusive_caps=1 
-ls /dev/video* 
+2. **Install dependencies:**
+   ```sh
+   yarn install
+   ```
 
-Screen as Webcam Input: sudo ffmpeg -f x11grab -r 15 -s 1280x720 -i :0.0 -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video2 
-Video as Webcam Input: ffmpeg -re -i ~/Downloads/ConvAI/Example.mp4 -vf scale=640:480 -pix_fmt yuyv422 -f v4l2 /dev/video2
+3. **Start the frontend server:**
+   ```sh
+   yarn dev
+   ```
 
-v4l2-ctl --list-devices 
-cheese --device=/dev/video2 
+### Backend Setup
+
+1. **Install Python dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+2. **Start the backend server:**
+   ```sh
+   python middleware.py
+   ```
+
+## License
+
+SymposiumAI is licensed under the MIT License. See the LICENSE file for more information.
+
+## Acknowledgments
+
+- Thanks to the WebRTC community for providing a robust framework for real-time communication.
+- Special thanks to all contributors and testers.
