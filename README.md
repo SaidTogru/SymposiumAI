@@ -2,6 +2,10 @@
 
 SymposiumAI is a video conference website that enables real-time messaging, video streaming, and screen sharing. Developed with a focus on privacy, performance, and efficiency, SymposiumAI is tailored for AI assistance to ensure that participants always have relevant information at hand, minimizing wasted time in meetings. Leveraging WebRTC for peer-to-peer communication, SymposiumAI offers a seamless and secure experience.
 
+## Beta Demo
+
+[![Watch the Demo](https://img.youtube.com/vi/Baq2E5SWZlg/maxresdefault.jpg)](https://www.youtube.com/watch?v=Baq2E5SWZlg)
+
 ## Features
 - Unlimited users
 - Real-time messaging chat and video streaming
